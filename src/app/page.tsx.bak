@@ -3,128 +3,121 @@
 import { useState } from "react";
 import {
   BarChart3,
-  Heart,
+  Users,
   MessageSquare,
-  MoreHorizontal,
+  Heart,
   Share2,
   Plus,
   RefreshCcw,
+  ChevronDown,
   Home,
   LayoutDashboard,
   Settings,
   Bell,
   Search,
-  LinkIcon,
-  ImageIcon,
+  Send,
+  MoreHorizontal,
+  Image as ImageIcon,
   Smile,
+  Link as LinkIcon,
+  ArrowUpRight,
   TrendingUp,
-  ChevronDown,
-  Users,
 } from "lucide-react";
 
-const accounts = [
-  { platform: "facebook", name: "Acme Co.", handle: "@acme.co", color: "bg-blue-600", meta: "Facebook · 48.2k" },
-  { platform: "instagram", name: "acme_store", handle: "@acme_store", color: "bg-pink-600", meta: "Instagram · 32.1k" },
-  { platform: "x", name: "Acme Dev", handle: "@acme_dev", color: "bg-black border border-gray-700", meta: "X · 44k" },
-];
+export default function DashboardPage() {
+  const [activeAccount, setActiveAccount] = useState("all");
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      platform: "facebook",
+      author: "Acme Co.",
+      handle: "@acme",
+      time: "2h",
+      content: "Summer campaign launch is live! 🌞 Check out our latest offers.",
+      image: null,
+      likes: 124,
+      comments: 18,
+      shares: 92,
+      commentList: [
+        { author: "Alice", text: "Great promo!", time: "1h" },
+        { author: "Bob", text: "When does it end?", time: "45m" },
+      ],
+    },
+    {
+      id: 2,
+      platform: "instagram",
+      author: "@acme_store",
+      handle: "acme_store",
+      time: "4h",
+      content: "Behind the scenes. New Reel dropping tomorrow 🔥",
+      image: true,
+      likes: 842,
+      comments: 64,
+      shares: 0,
+      commentList: [
+        { author: "Carol", text: "Can't wait!", time: "3h" },
+      ],
+    },
+    {
+      id: 3,
+      platform: "x",
+      author: "Acme Dev",
+      handle: "@acmedev",
+      time: "6h",
+      content: "Product update thread 🧵\n\nWe shipped 3 major improvements today. Read more below.",
+      image: null,
+      likes: 56,
+      comments: 41,
+      shares: 17,
+      commentList: [],
+    },
+  ]);
 
-const posts = [
-  { id: "1", author: "Acme Co.", platform: "facebook", handle: "@acme.co", time: "2h", content: "Summer campaign launch is live. New pricing and creative assets are ready.", likes: 92, comments: 18, shares: 64, image: true },
-  { id: "2", author: "acme_store", platform: "instagram", handle: "@acme_store", time: "5h", content: "Behind the scenes Reel from the studio.", likes: 241, comments: 32, shares: 84, image: false },
-  { id: "3", author: "Acme Dev", platform: "x", handle: "@acme_dev", time: "8h", content: "Product update thread: v2.4 is now in beta.", likes: 17, comments: 41, shares: 9, image: false },
-  { id: "4", author: "Acme Co.", platform: "facebook", handle: "@acme.co", time: "1d", content: "Customer spotlight: how Acme uses Acme.", likes: 3, comments: 9, shares: 2, image: false },
-];
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
+  const [openComments, setOpenComments] = useState<number[]>([]);
 
-function SidebarItem({
-  icon,
-  label,
-  active = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-        active
-          ? "bg-indigo-600/10 text-indigo-300"
-          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-      }`}
-    >
-      <span
-        className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
-          active
-            ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-300"
-            : "border-white/5 bg-white/[0.02] text-slate-400"
-        }`}
-      >
-        {icon}
-      </span>
-      <span className="font-medium text-slate-200">{label}</span>
-    </button>
-  );
-}
-
-function FilterChip({
-  label,
-  active,
-  onClick,
-  dotClassName,
-}: {
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-  dotClassName?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition ${
-        active
-          ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-200"
-          : "border-white/10 bg-white/[0.02] text-slate-300 hover:bg-white/5"
-      }`}
-    >
-      <span className={`h-2 w-2 rounded-full ${dotClassName ?? "bg-slate-400"}`} />
-      {label}
-    </button>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-  change,
-  icon,
-}: {
-  title: string;
-  value: string;
-  change: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{title}</span>
-        <span className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-slate-300">{icon}</span>
-      </div>
-      <div className="mt-4">
-        <p className="text-2xl font-semibold tracking-tight text-slate-100">{value}</p>
-        <p className="mt-1 text-xs text-emerald-400">{change}</p>
-      </div>
-    </div>
-  );
-}
-
-export default function SocialDashboard() {
-  const [activeAccount, setActiveAccount] = useState<string>("all");
-  const [openComments, setOpenComments] = useState<string | null>(null);
+  const accounts = [
+    { name: "Acme Co.", platform: "facebook", color: "bg-blue-600", meta: "24.1K followers" },
+    { name: "@acme_store", platform: "instagram", color: "bg-pink-600", meta: "11.3K followers" },
+    { name: "Acme Dev", platform: "x", color: "bg-black border border-gray-700", meta: "8.7K followers" },
+  ];
 
   const filteredPosts =
-    activeAccount === "all" ? posts : posts.filter((post) => post.platform === activeAccount);
+    activeAccount === "all" ? posts : posts.filter((p) => p.platform === activeAccount);
+
+  const toggleComments = (postId: number) => {
+    setOpenComments((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    );
+  };
+
+  const updateReply = (postId: number, text: string) => {
+    setReplyDrafts((prev) => ({ ...prev, [postId]: text }));
+  };
+
+  const submitReply = (postId: number) => {
+    const text = replyDrafts[postId]?.trim();
+    if (!text) return;
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              commentList: [
+                ...post.commentList,
+                { author: "You", text, time: "now" },
+              ],
+              comments: post.comments + 1,
+            }
+          : post
+      )
+    );
+    setReplyDrafts((prev) => {
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-[#06080d] text-slate-100 antialiased">
@@ -159,10 +152,17 @@ export default function SocialDashboard() {
         <header className="sticky top-0 z-20 border-b border-white/5 bg-[#06080d]/80 px-4 py-5 backdrop-blur md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Overview</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-100">Dashboard</h1>
-              <p className="mt-1 text-sm text-slate-400">Facebook, Instagram, and X in one place.</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                Overview
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-100">
+                Dashboard
+              </h1>
+              <p className="mt-1 text-sm text-slate-400">
+                Facebook, Instagram, and X in one place.
+              </p>
             </div>
+
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
               <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
                 <Search className="h-4 w-4 text-slate-500" />
@@ -204,7 +204,7 @@ export default function SocialDashboard() {
               />
               {accounts.map((account) => (
                 <FilterChip
-                  key={account.platform}
+                  key={`${account.platform}-${account.name}`}
                   label={account.name}
                   active={activeAccount === account.platform}
                   onClick={() => setActiveAccount(account.platform)}
@@ -215,10 +215,30 @@ export default function SocialDashboard() {
           </div>
 
           <section className="mb-8 grid gap-4 md:grid-cols-4">
-            <StatCard title="Total followers" value="124,352" change="+2.4%" icon={<Users className="h-5 w-5" />} />
-            <StatCard title="Avg. engagement" value="4.2%" change="+0.3%" icon={<Heart className="h-5 w-5" />} />
-            <StatCard title="Total posts" value="1,049" change="+8" icon={<BarChart3 className="h-5 w-5" />} />
-            <StatCard title="Comments" value="3,821" change="+142" icon={<MessageSquare className="h-5 w-5" />} />
+            <StatCard
+              title="Total followers"
+              value="124,352"
+              change="+2.4%"
+              icon={<Users className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Avg. engagement"
+              value="4.2%"
+              change="+0.3%"
+              icon={<Heart className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Total posts"
+              value="1,049"
+              change="+8"
+              icon={<BarChart3 className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Comments"
+              value="3,821"
+              change="+142"
+              icon={<MessageSquare className="h-5 w-5" />}
+            />
           </section>
 
           <section className="grid gap-6 lg:grid-cols-3">
@@ -232,6 +252,7 @@ export default function SocialDashboard() {
                   {filteredPosts.length} {filteredPosts.length === 1 ? "post" : "posts"}
                 </span>
               </div>
+
               <div className="space-y-4">
                 {filteredPosts.map((post) => (
                   <article
@@ -241,9 +262,7 @@ export default function SocialDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`h-10 w-10 rounded-full ${
-                            post.platform === "facebook" ? "bg-blue-600" : post.platform === "instagram" ? "bg-pink-600" : "bg-black border border-gray-700"
-                          }`}
+                          className={`h-10 w-10 rounded-full ${post.platform === "facebook" ? "bg-blue-600" : post.platform === "instagram" ? "bg-pink-600" : "bg-black border border-gray-700"}`}
                         />
                         <div>
                           <div className="flex items-center gap-2">
@@ -264,13 +283,18 @@ export default function SocialDashboard() {
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-200 whitespace-pre-line">{post.content}</p>
-                    {post.image ? (
+
+                    <p className="mt-3 text-sm leading-relaxed text-slate-200 whitespace-pre-line">
+                      {post.content}
+                    </p>
+
+                    {post.image && (
                       <div className="mt-3 flex items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-xs text-slate-500">
                         <ImageIcon className="mr-2 h-4 w-4" />
                         Post media placeholder
                       </div>
-                    ) : null}
+                    )}
+
                     <div className="mt-5 flex items-center justify-between text-xs text-slate-400">
                       <div className="flex items-center gap-5">
                         <span className="inline-flex items-center gap-1.5">
@@ -279,7 +303,7 @@ export default function SocialDashboard() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setOpenComments(openComments === post.id ? null : post.id)}
+                          onClick={() => toggleComments(post.id)}
                           className="inline-flex items-center gap-1.5 hover:text-slate-200"
                         >
                           <MessageSquare className="h-3.5 w-3.5" />
@@ -292,17 +316,56 @@ export default function SocialDashboard() {
                       </div>
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1.5 text-[11px] font-medium text-slate-200 hover:bg-white/5"
+                        className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300"
                       >
-                        <Smile className="h-3 w-3" />
-                        Quick reply
+                        <span className="text-xs font-medium">Open</span>
+                        <ArrowUpRight className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    {openComments === post.id ? (
-                      <div className="mt-3 rounded-xl border border-white/5 bg-white/[0.01] p-3">
-                        <p className="text-xs text-slate-400">Comment from Sarah: “Love this!”</p>
+
+                    {openComments.includes(post.id) && (
+                      <div className="mt-4 space-y-3 border-t border-white/5 pt-4">
+                        <div className="space-y-2">
+                          {post.commentList.length === 0 && (
+                            <p className="text-xs text-slate-500">No comments yet.</p>
+                          )}
+                          {post.commentList.map((comment, idx) => (
+                            <div
+                              key={`${post.id}-comment-${idx}`}
+                              className="flex items-start justify-between rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2"
+                            >
+                              <div>
+                                <p className="text-xs font-semibold text-slate-200">
+                                  {comment.author}
+                                </p>
+                                <p className="text-xs text-slate-400">{comment.text}</p>
+                              </div>
+                              <span className="text-[10px] text-slate-500">
+                                {comment.time}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={replyDrafts[post.id] || ""}
+                            onChange={(e) => updateReply(post.id, e.target.value)}
+                            placeholder="Write a reply..."
+                            className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-slate-200 outline-none placeholder:text-slate-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => submitReply(post.id)}
+                            className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                          >
+                            <Send className="h-3 w-3" />
+                            Reply
+                          </button>
+                        </div>
                       </div>
-                    ) : null}
+                    )}
                   </article>
                 ))}
               </div>
@@ -317,7 +380,7 @@ export default function SocialDashboard() {
                 <ul className="mt-4 space-y-2">
                   {accounts.map((account) => (
                     <li
-                      key={account.platform}
+                      key={`${account.platform}-${account.name}`}
                       className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2.5"
                     >
                       <div className="flex items-center gap-3">
@@ -386,8 +449,93 @@ export default function SocialDashboard() {
               </div>
             </aside>
           </section>
-        </section>
-      </main>
+        </main>
+    </div>
+  );
+}
+
+function SidebarItem({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+        active
+          ? "bg-indigo-600/10 text-indigo-300"
+          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+      }`}
+    >
+      <span
+        className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
+          active
+            ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-300"
+            : "border-white/5 bg-white/[0.02] text-slate-400"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="font-medium text-slate-200">{label}</span>
+    </button>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+  dotClassName,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  dotClassName?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+        active
+          ? "border-indigo-500/60 bg-indigo-600/10 text-indigo-200"
+          : "border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/15 hover:text-slate-200"
+      }`}
+    >
+      {dotClassName ? <span className={`h-2 w-2 rounded-full ${dotClassName}`} /> : null}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  change,
+  icon,
+}: {
+  title: string;
+  value: string;
+  change?: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{title}</p>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/[0.07] text-indigo-300">
+          {icon}
+        </span>
+      </div>
+      <div className="mt-3 flex items-end justify-between">
+        <p className="text-2xl font-semibold tracking-tight text-slate-100">{value}</p>
+        {change && <p className="text-xs font-medium text-emerald-500">{change}</p>}
+      </div>
     </div>
   );
 }
