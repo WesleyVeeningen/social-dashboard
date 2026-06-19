@@ -10,185 +10,533 @@ import {
   Plus,
   RefreshCcw,
   ChevronDown,
+  Home,
+  LayoutDashboard,
+  Settings,
+  Bell,
+  Search,
+  Send,
+  MoreHorizontal,
+  Image as ImageIcon,
+  Smile,
+  Link as LinkIcon,
+  ArrowUpRight,
+  TrendingUp,
 } from "lucide-react";
 
 export default function DashboardPage() {
+  const [activeAccount, setActiveAccount] = useState("all");
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      platform: "facebook",
+      author: "Acme Co.",
+      handle: "@acme",
+      time: "2h",
+      content: "Summer campaign launch is live! 🌞 Check out our latest offers.",
+      image: null,
+      likes: 124,
+      comments: 18,
+      shares: 92,
+      commentList: [
+        { author: "Alice", text: "Great promo!", time: "1h" },
+        { author: "Bob", text: "When does it end?", time: "45m" },
+      ],
+    },
+    {
+      id: 2,
+      platform: "instagram",
+      author: "@acme_store",
+      handle: "acme_store",
+      time: "4h",
+      content: "Behind the scenes. New Reel dropping tomorrow 🔥",
+      image: true,
+      likes: 842,
+      comments: 64,
+      shares: 0,
+      commentList: [
+        { author: "Carol", text: "Can't wait!", time: "3h" },
+      ],
+    },
+    {
+      id: 3,
+      platform: "x",
+      author: "Acme Dev",
+      handle: "@acmedev",
+      time: "6h",
+      content: "Product update thread 🧵\n\nWe shipped 3 major improvements today. Read more below.",
+      image: null,
+      likes: 56,
+      comments: 41,
+      shares: 17,
+      commentList: [],
+    },
+  ]);
+
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
+  const [openComments, setOpenComments] = useState<number[]>([]);
+
+  const accounts = [
+    { name: "Acme Co.", platform: "facebook", color: "bg-blue-600", meta: "24.1K followers" },
+    { name: "@acme_store", platform: "instagram", color: "bg-pink-600", meta: "11.3K followers" },
+    { name: "Acme Dev", platform: "x", color: "bg-black border border-gray-700", meta: "8.7K followers" },
+  ];
+
+  const filteredPosts =
+    activeAccount === "all" ? posts : posts.filter((p) => p.platform === activeAccount);
+
+  const toggleComments = (postId: number) => {
+    setOpenComments((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    );
+  };
+
+  const updateReply = (postId: number, text: string) => {
+    setReplyDrafts((prev) => ({ ...prev, [postId]: text }));
+  };
+
+  const submitReply = (postId: number) => {
+    const text = replyDrafts[postId]?.trim();
+    if (!text) return;
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              commentList: [
+                ...post.commentList,
+                { author: "You", text, time: "now" },
+              ],
+              comments: post.comments + 1,
+            }
+          : post
+      )
+    );
+    setReplyDrafts((prev) => {
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+  };
+
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-100">
-            Social Dashboard
-          </h1>
-          <p className="text-sm text-slate-400">
-            Multi-account overview for Facebook, Instagram, and X
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
-          >
-            <ChevronDown className="h-4 w-4" />
-            <span>All accounts</span>
-          </button>
-
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-white"
-          >
-            <Plus className="h-4 w-4" />
-            Add account
-          </button>
-
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Refresh
-          </button>
-        </div>
-      </header>
-
-      <section className="grid gap-4 md:grid-cols-4">
-        <StatCard title="Total followers" value="124,352" icon={<Users className="h-4 w-4" />} />
-        <StatCard title="Avg. engagement" value="4.2%" icon={<Heart className="h-4 w-4" />} />
-        <StatCard title="Total posts" value="1,049" icon={<BarChart3 className="h-4 w-4" />} />
-        <StatCard title="Comments" value="3,821" icon={<MessageSquare className="h-4 w-4" />} />
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 lg:col-span-2">
-          <h2 className="text-base font-medium text-slate-200">Unified feed</h2>
-          <p className="mt-1 text-sm text-slate-400">
-            Posts from connected Facebook, Instagram, and X accounts
-          </p>
-
-          <div className="mt-4 divide-y divide-slate-800">
-            <FeedRow platform="facebook" title="Summer campaign launch" comments={18} shares={92} />
-            <FeedRow platform="instagram" title="Behind the scenes Reel" comments={64} />
-            <FeedRow platform="x" title="Product update thread" comments={41} shares={17} />
-            <FeedRow platform="facebook" title="Customer spotlight" comments={9} shares={3} />
+    <div className="flex min-h-screen bg-[#06080d] text-slate-100 antialiased">
+      <aside className="hidden w-64 flex-col border-r border-white/5 bg-[#0a0f18]/70 backdrop-blur md:flex">
+        <div className="flex items-center gap-3 px-5 py-6">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+            <LayoutDashboard className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold tracking-tight text-slate-100">SocialDash</p>
+            <p className="text-xs text-slate-500">Workspace</p>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <ConnectedAccounts />
-          <ReplyInbox />
+        <nav className="flex-1 space-y-1 px-3">
+          <SidebarItem icon={<Home className="h-4 w-4" />} label="Home" />
+          <SidebarItem icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" active />
+          <SidebarItem icon={<Bell className="h-4 w-4" />} label="Notifications" />
+          <SidebarItem icon={<Settings className="h-4 w-4" />} label="Settings" />
+        </nav>
+        <div className="border-t border-white/5 p-3">
+          <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.35)]" />
+            <div>
+              <p className="text-xs font-medium text-slate-200">Gateway</p>
+              <p className="text-xs text-emerald-500">Online</p>
+            </div>
+          </div>
         </div>
-      </section>
-    </main>
+      </aside>
+
+      <main className="flex-1">
+        <header className="sticky top-0 z-20 border-b border-white/5 bg-[#06080d]/80 px-4 py-5 backdrop-blur md:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                Overview
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-100">
+                Dashboard
+              </h1>
+              <p className="mt-1 text-sm text-slate-400">
+                Facebook, Instagram, and X in one place.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                <Search className="h-4 w-4 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search posts, comments..."
+                  className="w-48 bg-transparent text-sm text-slate-200 outline-none placeholder:text-slate-500"
+                />
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-medium text-slate-300 hover:bg-white/[0.06]"
+              >
+                <RefreshCcw className="h-4 w-4" />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] hover:bg-indigo-500"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <section className="mx-auto max-w-7xl px-4 py-6 md:px-8">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-200">Connected accounts</h2>
+              <p className="text-xs text-slate-500">Switch views without leaving the dashboard.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <FilterChip
+                label="All accounts"
+                active={activeAccount === "all"}
+                onClick={() => setActiveAccount("all")}
+              />
+              {accounts.map((account) => (
+                <FilterChip
+                  key={`${account.platform}-${account.name}`}
+                  label={account.name}
+                  active={activeAccount === account.platform}
+                  onClick={() => setActiveAccount(account.platform)}
+                  dotClassName={account.color}
+                />
+              ))}
+            </div>
+          </div>
+
+          <section className="mb-8 grid gap-4 md:grid-cols-4">
+            <StatCard
+              title="Total followers"
+              value="124,352"
+              change="+2.4%"
+              icon={<Users className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Avg. engagement"
+              value="4.2%"
+              change="+0.3%"
+              icon={<Heart className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Total posts"
+              value="1,049"
+              change="+8"
+              icon={<BarChart3 className="h-5 w-5" />}
+            />
+            <StatCard
+              title="Comments"
+              value="3,821"
+              change="+142"
+              icon={<MessageSquare className="h-5 w-5" />}
+            />
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-4 lg:col-span-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-200">Unified feed</h3>
+                  <p className="text-xs text-slate-500">Latest activity across your accounts.</p>
+                </div>
+                <span className="text-xs text-slate-500">
+                  {filteredPosts.length} {filteredPosts.length === 1 ? "post" : "posts"}
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {filteredPosts.map((post) => (
+                  <article
+                    key={post.id}
+                    className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] transition hover:border-white/15"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`h-10 w-10 rounded-full ${post.platform === "facebook" ? "bg-blue-600" : post.platform === "instagram" ? "bg-pink-600" : "bg-black border border-gray-700"}`}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-slate-100">{post.author}</p>
+                            <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                              {post.platform}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            {post.handle} · {post.time}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="rounded-full p-2 text-slate-400 hover:bg-white/5"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <p className="mt-3 text-sm leading-relaxed text-slate-200 whitespace-pre-line">
+                      {post.content}
+                    </p>
+
+                    {post.image && (
+                      <div className="mt-3 flex items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-xs text-slate-500">
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        Post media placeholder
+                      </div>
+                    )}
+
+                    <div className="mt-5 flex items-center justify-between text-xs text-slate-400">
+                      <div className="flex items-center gap-5">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Heart className="h-3.5 w-3.5" />
+                          {post.likes}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleComments(post.id)}
+                          className="inline-flex items-center gap-1.5 hover:text-slate-200"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          {post.comments}
+                        </button>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Share2 className="h-3.5 w-3.5" />
+                          {post.shares}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300"
+                      >
+                        <span className="text-xs font-medium">Open</span>
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    {openComments.includes(post.id) && (
+                      <div className="mt-4 space-y-3 border-t border-white/5 pt-4">
+                        <div className="space-y-2">
+                          {post.commentList.length === 0 && (
+                            <p className="text-xs text-slate-500">No comments yet.</p>
+                          )}
+                          {post.commentList.map((comment, idx) => (
+                            <div
+                              key={`${post.id}-comment-${idx}`}
+                              className="flex items-start justify-between rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2"
+                            >
+                              <div>
+                                <p className="text-xs font-semibold text-slate-200">
+                                  {comment.author}
+                                </p>
+                                <p className="text-xs text-slate-400">{comment.text}</p>
+                              </div>
+                              <span className="text-[10px] text-slate-500">
+                                {comment.time}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={replyDrafts[post.id] || ""}
+                            onChange={(e) => updateReply(post.id, e.target.value)}
+                            placeholder="Write a reply..."
+                            className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-slate-200 outline-none placeholder:text-slate-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => submitReply(post.id)}
+                            className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                          >
+                            <Send className="h-3 w-3" />
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <aside className="space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-200">Connected accounts</h3>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">3 active</span>
+                </div>
+                <ul className="mt-4 space-y-2">
+                  {accounts.map((account) => (
+                    <li
+                      key={`${account.platform}-${account.name}`}
+                      className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2.5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`h-2.5 w-2.5 rounded-full ${account.color}`} />
+                        <div>
+                          <p className="text-sm font-medium text-slate-200">{account.name}</p>
+                          <p className="text-xs text-slate-500">{account.meta}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5"
+                      >
+                        <LinkIcon className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-3 py-2.5 text-xs font-medium text-slate-400 hover:border-white/15 hover:text-slate-200"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add account
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-200">Reply inbox</h3>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    <TrendingUp className="h-3 w-3" />
+                    4 new
+                  </span>
+                </div>
+                <ul className="mt-4 space-y-3">
+                  <li className="rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-slate-200">Alice</p>
+                      <span className="text-[10px] text-slate-500">2m</span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">When does the sale end?</p>
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.02] px-2 py-1.5 text-[11px] font-medium text-slate-200 hover:bg-white/5"
+                    >
+                      <Smile className="h-3 w-3" />
+                      Quick reply
+                    </button>
+                  </li>
+                  <li className="rounded-xl border border-white/5 bg-white/[0.01] px-3 py-2.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-slate-200">Bob</p>
+                      <span className="text-[10px] text-slate-500">11m</span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">Love this post 🔥</p>
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.02] px-2 py-1.5 text-[11px] font-medium text-slate-200 hover:bg-white/5"
+                    >
+                      <Smile className="h-3 w-3" />
+                      Quick reply
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </section>
+        </main>
+      </main>
+    </div>
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+function SidebarItem({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+    <button
+      type="button"
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+        active
+          ? "bg-indigo-600/10 text-indigo-300"
+          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+      }`}
+    >
+      <span
+        className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
+          active
+            ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-300"
+            : "border-white/5 bg-white/[0.02] text-slate-400"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="font-medium text-slate-200">{label}</span>
+    </button>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+  dotClassName,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  dotClassName?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+        active
+          ? "border-indigo-500/60 bg-indigo-600/10 text-indigo-200"
+          : "border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/15 hover:text-slate-200"
+      }`}
+    >
+      {dotClassName ? <span className={`h-2 w-2 rounded-full ${dotClassName}`} /> : null}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  change,
+  icon,
+}: {
+  title: string;
+  value: string;
+  change?: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-400">{title}</p>
-        <span className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-200">
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{title}</p>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/[0.07] text-indigo-300">
           {icon}
         </span>
       </div>
-      <p className="mt-2 text-2xl font-semibold text-slate-100">{value}</p>
-    </div>
-  );
-}
-
-function platformStyles(platform: string) {
-  switch (platform) {
-    case "facebook":
-      return "bg-fb";
-    case "instagram":
-      return "bg-ig";
-    case "x":
-      return "bg-x";
-    default:
-      return "bg-slate-500";
-  }
-}
-
-function FeedRow({ platform, title, comments, shares }: { platform: string; title: string; comments: number; shares?: number }) {
-  return (
-    <div className="flex items-center justify-between py-3">
-      <div className="flex items-center gap-3">
-        <span className={`h-8 w-8 rounded-full ${platformStyles(platform)}`} />
-        <div>
-          <p className="text-sm font-medium text-slate-200">{title}</p>
-          <p className="text-xs text-slate-500 capitalize">{platform}</p>
-        </div>
+      <div className="mt-3 flex items-end justify-between">
+        <p className="text-2xl font-semibold tracking-tight text-slate-100">{value}</p>
+        {change && <p className="text-xs font-medium text-emerald-500">{change}</p>}
       </div>
-
-      <div className="flex items-center gap-4 text-xs text-slate-400">
-        <span className="inline-flex items-center gap-1">
-          <MessageSquare className="h-3.5 w-3.5" />
-          {comments}
-        </span>
-        {shares !== undefined ? (
-          <span className="inline-flex items-center gap-1">
-            <Share2 className="h-3.5 w-3.5" />
-            {shares}
-          </span>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function ConnectedAccounts() {
-  const accounts = [
-    { name: "Acme Co.", platform: "facebook" },
-    { name: "@acme_store", platform: "instagram" },
-    { name: "Acme Dev", platform: "x" },
-  ];
-
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-      <h3 className="text-sm font-medium text-slate-200">Connected accounts</h3>
-      <ul className="mt-3 space-y-2">
-        {accounts.map((account) => (
-          <li key={`${account.platform}-${account.name}`} className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900 px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full ${platformStyles(account.platform)}`} />
-              <span className="text-sm text-slate-200">{account.name}</span>
-            </div>
-            <span className="text-xs text-slate-500 capitalize">{account.platform}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ReplyInbox() {
-  const rows = [
-    { id: 1, from: "Alice", text: "When does the sale end?", time: "2m" },
-    { id: 2, from: "Bob", text: "Love this post 🔥", time: "11m" },
-    { id: 3, from: "Carol", text: "Is this available in EU?", time: "34m" },
-  ];
-
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-      <h3 className="text-sm font-medium text-slate-200">Reply inbox</h3>
-      <ul className="mt-3 space-y-3">
-        {rows.map((row) => (
-          <li key={row.id} className="rounded-md border border-slate-800 bg-slate-900 px-3 py-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-200">{row.from}</p>
-              <span className="text-xs text-slate-500">{row.time}</span>
-            </div>
-            <p className="mt-1 text-xs text-slate-400">{row.text}</p>
-            <button
-              type="button"
-              className="mt-2 inline-flex items-center gap-1 rounded-md border border-slate-800 px-2 py-1 text-xs text-slate-200 hover:bg-slate-800"
-            >
-              Reply
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
